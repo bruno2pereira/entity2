@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="Description" content="Sofia Carvalho - " />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atlântida - Rent a Car - Criar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./css/main.css" />
+  </head>
+  <body>
+    <!-- navbar -->
+    <div class="mb-4" style="background-color: #333; display: flex">
+      <div class="dropdown">
+        <a class="start" href="index.html">Início</a>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Clientes</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=clientes" class="dropdown-item">Lista de Clientes</a>
+          <a href="editor.html?page=clientes&type=new" class="dropdown-item">Adicionar Cliente</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Veículos</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=automoveis" class="dropdown-item">Lista de Veículos</a>
+          <a href="editor.html?page=automoveis&type=new" class="dropdown-item">Adicionar Veículo</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Funcionários</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=funcionarios" class="dropdown-item">Lista de Funcionários</a>
+          <a href="editor.html?page=funcionarios&type=new" class="dropdown-item">Adicionar Funcionário</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Encomendas</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=encomendas" class="dropdown-item">Lista de Encomendas</a>
+          <a href="editor.html?page=encomendas&type=new" class="dropdown-item">Adicionar Encomendas</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Alugueres</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=alugueres" class="dropdown-item">Lista de Alugueres</a>
+          <a href="editor.html?page=alugueres&type=new" class="dropdown-item">Adicionar Alugueres</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Outros</a>
+        <div class="dropdown-menu">
+          <a href="lista.html?page=fornecedores" class="dropdown-item">Lista de Fornecedores</a>
+          <a href="editor.html?page=fornecedores&type=new" class="dropdown-item">Adicionar Fornecedores</a>
+          <div class="dropdown-divider"></div>
+          <a href="lista.html?page=localidades" class="dropdown-item">Lista de Localidades</a>
+          <a href="editor.html?page=localidades&type=new" class="dropdown-item">Adicionar Localidades</a>
+          <div class="dropdown-divider"></div>
+          <a href="lista.html?page=marcas" class="dropdown-item">Lista de Marcas</a>
+          <a href="editor.html?page=marcas&type=new" class="dropdown-item">Adicionar Marcas</a>
+          <div class="dropdown-divider"></div>
+          <a href="lista.html?page=segmentos" class="dropdown-item">Lista de Segmentos</a>
+          <a href="editor.html?page=segmentos&type=new" class="dropdown-item">Adicionar Segmentos</a>
+          <div class="dropdown-divider"></div>
+          <a href="lista.html?page=TipoCaixas" class="dropdown-item">Lista de Tipo de Caixas</a>
+          <a href="editor.html?page=TipoCaixas&type=new" class="dropdown-item">Adicionar Tipo de Caixas</a>
+        </div>
+      </div>
+    </div>
+    <!-- fim da navbar -->
+
+    <form id="form"></form>
+
+    <div class="bottomRight">
+      <button id="delete" type="submit" onclick="deleteObject()" class="btn btn-danger mb-2">Apagar</button>
+      <button id="update" type="submit" onclick="put()" class="btn btn-primary mb-2"></button>
+      <button id="add" style="display: none" onclick="post()" type="submit" class="btn btn-success mb-2"></button>
+    </div>
+  </body>
+
+  <script>
+    $(document).ready(function () {
+      var localidade;
+      window.apiUrl = function () {
+        return 'https://localhost:44334/api/';
+      };
+      const urlSearchParams = new URLSearchParams(window.location.search); //   page = funcionarios   |   type = new
+      const page = Object.fromEntries(urlSearchParams.entries()).page; // funcionarios
+      const type = Object.fromEntries(urlSearchParams.entries()).type; // new
+      const id = Object.fromEntries(urlSearchParams.entries()).id; // undefined
+      const url = apiUrl() + page + '/' + (type === 'new' ? 0 : id); // https://localhost:44368/api/funcionarios/0
+
+      var list;
+
+      function getObject() {
+        let obj = '{';
+        $.each(form, function (index, value) {
+          obj = obj + '"' + value.id + '":';
+          if (value.type === 'text' || value.type === 'password' || value.type === 'datetime-local') {
+            obj = obj + `"${value.value}",`;
+          } else if (value.type === 'select-one') {
+            obj = obj + `{Id :"${value.value}"},`;
+          } else if (value.type === 'select-multiple') {
+            let s = '#' + value.id;
+
+            let arr = $(s).val();
+            obj = obj + '[';
+            $.each(arr, function (i, v) {
+              obj = obj + `{Id :"${v}"},`;
+            });
+
+            obj = obj + ']';
+          }
+        });
+        obj = obj + '}';
+        return obj;
+      }
+
+      window.post = function () {
+        let form = $('#form :input');
+
+        let obj = getObject();
+
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', redirect: 'follow', credentials: 'same-origin' }, body: obj })
+          .then((response) => {
+            if (response.ok) {
+              alert(`${page} guardado com sucesso`);
+              document.location.href = 'lista.html?page=' + page;
+            } else {
+              alert('Ocorreu um erro');
+            }
+          })
+          .catch((err) => alert('Ocorreu um erro'));
+      };
+
+      window.get = function (uri, id) {
+        let finishURI = '';
+        if (id !== undefined) {
+          finishURI = '/' + id;
+        }
+        return $.ajax({
+          url: apiUrl() + uri + finishURI,
+          type: 'get',
+        });
+      };
+
+      window.put = function (controller, data) {
+        let form = $('#form :input');
+
+        let obj = getObject();
+        return fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: obj })
+          .then((response) => {
+            if (response.ok) {
+              alert(`${page} guardado com sucesso`);
+              document.location.href = 'lista.html?page=' + page;
+            } else {
+              alert('Ocorreu um erro');
+            }
+          })
+          .catch((err) => alert('Ocorreu um erro'));
+      };
+
+      window.deleteObject = function () {
+        return $.ajax({
+          url: url,
+          type: 'delete',
+        }).then((response) => {
+          alert(`${page} ${id} apagado com sucesso`);
+          document.location.href = 'lista.html?page=' + page;
+        });
+      };
+
+      $.ajax({
+        url: url,
+        type: 'get',
+        success: function (data) {
+          // {Id: 1, Nome: "Carlos", NIF: "215478555"}
+          var listOfProps = []; // [Id, nome, NIF]
+          $.each(data, function (prop) {
+            listOfProps.push(prop);
+          });
+          list = listOfProps;
+          $('#errorTitle').hide();
+          if (type == 'new') {
+            $('#update').hide();
+            $('#delete').hide();
+            $('#add').show();
+            $('#add').text('Adicionar ' + page.slice(0, -1));
+          } else {
+            $('#update').text('Atualizar ' + page.slice(0, -1));
+            $('#delete').text('Apagar ' + page.slice(0, -1));
+          }
+          $.each(listOfProps, function (index, value) {
+            console.log('🚀 ~ file: editor.html ~ line 191 ~ listOfProps', listOfProps);
+            let input;
+
+            if (value != 'Id') {
+              if (value == 'Idade') {
+                input =
+                  "<div class='form-group row mb-3'>" +
+                  "<label class='col-sm-2 col-form-label'>Data de Nascimento</label>" +
+                  "<div class='col-sm-4'><input type='date' class='form-control' id='Idade' placeholder='dd-mm-aaaa'></div></div>";
+              }
+              if (value == 'Password') {
+                input =
+                  "<div class='form-group row mb-3'>" +
+                  "<label class='col-sm-2 col-form-label'>Password</label>" +
+                  "<div class='col-sm-4'><input type='password' class='form-control' id='Password' placeholder='Password'></div></div>";
+              }
+              if (value == 'Recolha' || value == 'Devolucao') {
+                input =
+                  "<div class='form-group row mb-3'>" +
+                  `<label class='col-sm-2 col-form-label'>${value}</label>` +
+                  `<div class='col-sm-4'><input onchange="cenas()" type='datetime-local' id='${value}' value='${data[value]}' class='form-control'></div></div>`;
+              }
+              if (value == 'Localidade' || value == 'Marca' || value == 'TipoCaixa' || value == 'Segmento' || value == 'Automovel' || value == 'Cliente' || value == 'Funcionario' || value == 'Fornecedor') {
+                // caso de trate de uma propriedade listavel é criado um select com o ID associado à propriedade: id='select_propriedade' de depois de criadas vão permitir associar os valores
+                input = "<div class='form-group row mb-3'>" + "<label class='col-sm-2 col-form-label'>" + value + '</label>' + "<div class='col-sm-4'><select class='form-select' id='" + value + "'></select></div></div>";
+              }
+              if (value == 'Automoveis') {
+                // caso de trate de uma propriedade listavel é criado um select com o ID associado à propriedade: id='select_propriedade' de depois de criadas vão permitir associar os valores
+                input =
+                  "<div class='form-group row mb-3'>" +
+                  "<label class='col-sm-2 col-form-label'>" +
+                  value +
+                  '</label>' +
+                  "<div class='col-sm-4'><select class='form-select' id='" +
+                  value +
+                  "' multiple></select></div></div>";
+              }
+              if (
+                value != 'Password' &&
+                value != 'Idade' &&
+                value != 'Localidade' &&
+                value != 'Marca' &&
+                value != 'TipoCaixa' &&
+                value != 'Segmento' &&
+                value != 'Automovel' &&
+                value != 'Cliente' &&
+                value != 'Funcionario' &&
+                value != 'Recolha' &&
+                value != 'Devolucao' &&
+                value != 'Automoveis' &&
+                value != 'Fornecedor'
+              ) {
+                input =
+                  "<div class='form-group row mb-3'>" +
+                  "<label class='col-sm-2 col-form-label'>" +
+                  value +
+                  '</label>' +
+                  "<div class='col-sm-4'><input type='text' class='form-control' id='" +
+                  value +
+                  "'placeholder='" +
+                  value +
+                  "' value='" +
+                  data[value] +
+                  "'></div></div>";
+              }
+            } else {
+              input = "<input type='text' style='display: none' value='" + data[value] + "' class='form-control' id='Id'>";
+            }
+            $('#form').append(input);
+          });
+        },
+        error: function (data) {
+          $('#form').hide();
+          $('#delete').hide();
+          $('#update').hide();
+          $('body').append("<h2 id='errorTitle' style='text-align:center'>Ocorreu um erro, tente de novo.</h2>");
+        },
+      }).then(function (data) {
+        $.each(list, function (index, value) {
+          if (
+            value == 'Localidade' ||
+            value == 'Marca' ||
+            value == 'TipoCaixa' ||
+            value == 'Segmento' ||
+            value == 'Automovel' ||
+            value == 'Cliente' ||
+            value == 'Funcionario' ||
+            value == 'Automoveis' ||
+            value == 'Fornecedor'
+          ) {
+            let select = value;
+            let nextURL = apiUrl() + select + 's';
+            if (value == 'Automovel' || value == 'Automoveis') nextURL = apiUrl() + 'Automoveis';
+            if (value == 'Fornecedor') nextURL = apiUrl() + 'Fornecedores';
+            $.ajax({
+              url: nextURL,
+              type: 'get',
+              success: function (infodata) {
+                $.each(infodata, function (index, value) {
+                  let option;
+                  let fla = false;
+                  if (type != 'new') {
+                    fla = data[select].Id === value.Id;
+                    if (select == 'Automovel' || select == 'Automoveis') {
+                      option = `<option id="option_${index}" value="${value.Id}" ${fla ? 'selected' : ''}">${value.Marca.Nome} ${value.Modelo}</option>`;
+                    } else {
+                      option = `<option id="option_${index}" value="${value.Id}" ${fla ? 'selected' : ''}">${value.Nome}</option>`;
+                    }
+                  } else {
+                    if (select == 'Automovel' || select == 'Automoveis') {
+                      option = `<option id="option_${index}" value="${value.Id}" >${value.Marca.Nome} ${value.Modelo}</option>`;
+                    } else {
+                      option = `<option id="option_${index}" value="${value.Id}" >${value.Nome}</option>`;
+                    }
+                  }
+
+                  $('#' + select).append(option);
+                  if (fla) $('#' + select).val(data[select].Id);
+                });
+              },
+            });
+
+            let option = "<option id='loading'>a carregar as opções disponiveis</option>";
+            $('#select_' + select).append(option);
+            if (page == 'alugueres' && type == 'new') {
+              $('#Automovel').hide();
+              $('#Cliente').hide();
+              $('#Funcionario').hide();
+            } else if (page == 'alugueres' && type == 'update') {
+              $('#Automovel').attr('disabled', 'disabled');
+            }
+          }
+        });
+      });
+    });
+
+    window.cenas = function () {
+      if ($('#Recolha').val() && $('#Devolucao').val()) {
+        $.ajax({
+          url: apiUrl() + `Automoveis/disponiveis?start=${$('#Recolha').val()}&end=${$('#Devolucao').val()}`,
+          type: 'get',
+          success: function (infodata) {
+            $('#Automovel').empty();
+            $.each(infodata, function (index, value) {
+              let option;
+              if ($('#Automovel')) {
+                option = `<option id="option_${index}" value="${value.Id}" >${value.Marca.Nome} ${value.Modelo}</option>`;
+              }
+
+              $('#Automovel').append(option);
+            });
+          },
+        });
+
+        $('#Automovel').show();
+        $('#Cliente').show();
+        $('#Funcionario').show();
+        $('#Automovel').removeAttr('disabled');
+        const diff = Math.abs(new Date($('#Recolha').val()).getTime() - new Date($('#Devolucao').val()).getTime());
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      } else {
+        $('#Automovel').hide();
+        $('#Cliente').hide();
+        $('#Funcionario').hide();
+      }
+    };
+
+    function getAge(dateString) {
+      var today = new Date();
+      var birthDate = new Date(dateString);
+      var age = today.getFullYear() - birthDate.getFullYear();
+      var m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+  </script>
+  <!-- <script src="js/main.js"></script> -->
+</html>

@@ -1,0 +1,40 @@
+ /* ################### NAVBAR ################### */
+ .dropdown-toggle{
+    color:antiquewhite;
+}
+.dropdown-toggle:hover{
+    color:#1D945B !important;
+}
+.dropdown{
+    margin-left: 25px;
+}
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
+.start{
+    color:antiquewhite !important;
+}
+.start:hover{
+    color:#1D945B !important;
+}
+
+/* ################### BODY ################### */
+body{
+    margin: 1.5rem;
+    background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNLVT1DYQl6Tj0jZS9bVuiq3n7JNS-A4K41w&usqp=CAU);
+    background-repeat: no-repeat;
+    background-size: cover;
+    
+}
+
+.bottomRight {
+    position: absolute; 
+    bottom: 20px; 
+    right: 20px;
+}
+
+.bottomRight button {
+    float: right;
+    margin-left: 0.3rem;
+}

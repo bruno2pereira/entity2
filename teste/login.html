@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlântida - Rent a Car - Criar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/main.css">
+</head>
+<body>
+    <form id="formLogin"  >
+        <input type="text"      name="username" id="username" >
+        <input type="password"  name="password" id="password" >
+        <button type="submit" id="submit" onclick="submitform()" >Login</button>
+    </form>
+</body>
+<script >  
+let url =  apiUrl() + 'login';
+let isLoading = false;
+const form = {
+  username: document.querySelector("#username"),
+  password: document.querySelector("#password"),
+  submit: document.querySelector("#submit")
+};
+
+
+function submitform(){
+
+  var myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+
+var raw = JSON.stringify({
+  "password": form.password.value,
+  "username": form.username.value
+});
+
+
+  var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: raw,
+  redirect: 'follow',
+  credentials: 'same-origin',
+};
+
+if(!isLoading)
+ loginRequest(requestOptions);
+
+
+}
+
+
+
+
+
+//Form LOGIN
+form.submit.addEventListener("click", (e) => {
+  e.preventDefault();
+  submitform()
+});
+
+function loginRequest(requestOptions){
+  isLoading =
+  fetch("https://localhost:44334/api/login", requestOptions)
+  .then(response => {
+    let token = response.headers.get('token')
+    if(response.ok){
+      alert('Login efetuado com sucesso')
+      document.location.href = 'index.html'
+      
+    }else{
+      alert('Verifique os seus dados')
+
+    }
+    isLoading = false
+  })
+  .catch(error => {
+    isLoading= false
+    alert( 'erro')});
+
+
+}
+
+
+
+function apiUrl(){
+    return 'https://localhost:44334/api/';
+}
+
+
+</script>
+
+
+</script>
+</html>
